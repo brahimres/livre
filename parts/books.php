@@ -1,19 +1,55 @@
 <?php
 
+$args = ['post_type' => 'book'];
+
+$meta_queries = [];
+$taxonomy_queries = [];
+
 if (isset($_GET['author'])) {
-    var_dump($_GET['author']);
+    $author_query = $_GET['author'];
+
+    $authors = [];
+
+    if (is_array($author_query)) {
+        $authors = $author_query;
+    } else if (is_string($author_query)) {
+        $authors[] = $author_query;
+    }
+
+    foreach ($authors as $author) {
+        $meta_queries[] = [
+            'key' => 'book_authors',
+            'value' => $author,
+            'compare' => 'LIKE'
+        ];
+    }
 }
 
 if (isset($_GET['published'])) {
-    var_dump($_GET['published']);
+    $publication_date_query = $_GET['published'];
+
+    $publication_dates = [];
+
+    if (is_array($publication_date_query)) {
+        $publication_dates = $publication_date_query;
+    } else if (is_string($publication_date_query)) {
+        $publication_dates[] = $publication_date_query;
+    }
+
+    foreach ($publication_dates as $poslication_date) {
+        $taxonomy_queries[] = [
+            'taxonomy' => 'book_publication_date',
+            'field' => 'slug',
+            'terms' => $publication_dates,
+            'compare' => "IN"
+        ];
+    }
 }
-die();
 
-?>
+$args['tax_query'] = $taxonomy_queries;
+$args['meta_query'] = $meta_queries;
 
-<?php
-
-$books = new WP_Query(['post_type' => 'book']);
+$books = new WP_Query($args);
 
 /**
  * 
